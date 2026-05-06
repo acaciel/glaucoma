@@ -17,7 +17,6 @@ scaler = joblib.load("scaler.pkl")
 def extract_lbp_features(image, P, R):
     lbp = local_binary_pattern(image, P, R, method="uniform")
     
-    # FIXED bin (WAJIB untuk konsistensi)
     n_bins = P + 2  
     
     hist, _ = np.histogram(
@@ -56,24 +55,24 @@ def extract_glcm_features(image):
 def extract_features(image):
     features = []
 
-    # ========================
-    # LBP dulu (SAMA kayak training)
-    # ========================
+    # ===
+    # LBP
+    # ===
     lbp_params = [(8,1), (16,2)]
     for P, R in lbp_params:
         features.extend(extract_lbp_features(image, P, R))
 
-    # ========================
-    # Baru GLCM
-    # ========================
+    # ====
+    # GLCM
+    # ====
     features.extend(extract_glcm_features(image))
 
     return np.array(features)
 
 
-# ========================
+# =============
 # UI Streamlit
-# ========================
+# =============
 
 st.title("Deteksi Glaukoma dari Citra Fundus")
 st.write("Upload citra fundus untuk diklasifikasikan menjadi Normal atau Glaukoma")
@@ -86,28 +85,25 @@ if uploaded_file is not None:
 
     st.image(img, caption="Citra Input", use_column_width=True)
 
-    # ========================
+    # ==============
     # Preprocessing
-    # ========================
+    # ==============
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img_gray = cv2.resize(img_gray, (256, 256))
 
-    # ========================
+    # ===================
     # Feature Extraction
-    # ========================
+    # ===================
     features = extract_features(img_gray)
 
-    # DEBUG (boleh hapus nanti)
-    st.write("Jumlah fitur:", len(features))
-
-    # ========================
+    # ========
     # Scaling
-    # ========================
+    # ========
     features = scaler.transform([features])
 
-    # ========================
+    # ===========
     # Prediction
-    # ========================
+    # ===========
     prediction = model.predict(features)[0]
 
     if prediction == 0:
