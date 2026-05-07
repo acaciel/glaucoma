@@ -275,4 +275,3 @@ st.markdown(
     '<div class="footer">Skripsi — Deteksi Glaukoma Menggunakan Kombinasi Fitur GLCM dan Multiscale LBP</div>',
     unsafe_allow_html=True
 )
-```
