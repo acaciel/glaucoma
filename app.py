@@ -1,8 +1,3 @@
-# Upgrade UI Streamlit App — Modern Version
-
-Ganti seluruh isi `app.py` dengan kode berikut untuk mendapatkan tampilan yang lebih modern, clean, dan tidak terlalu kaku.
-
-```python
 import streamlit as st
 import numpy as np
 import cv2
