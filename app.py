@@ -1,114 +1,80 @@
 import streamlit as st
+from PIL import Image
 import numpy as np
 import cv2
 import joblib
 from skimage.feature import graycomatrix, graycoprops, local_binary_pattern
 
 # ========================
-# Page Config
+# PAGE CONFIG
 # ========================
+
 st.set_page_config(
     page_title="Deteksi Glaukoma",
-    page_icon="🩺",
-    layout="wide"
+    page_icon="👁️",
+    layout="centered"
 )
 
 # ========================
-# Custom CSS
+# CUSTOM CSS
 # ========================
+
 st.markdown("""
 <style>
 
 .stApp {
-    background: linear-gradient(to bottom right, #eef4ff, #f8fbff);
+    background-color: #f7f9fc;
 }
 
 .block-container {
     padding-top: 2rem;
     padding-bottom: 2rem;
+    max-width: 800px;
 }
 
-.main-title {
-    font-size: 48px;
-    font-weight: 800;
-    color: #1b2559;
-    margin-bottom: 10px;
+h1 {
+    text-align: center;
+    color: #1f2937;
 }
 
 .subtitle {
-    font-size: 18px;
-    color: #5b6478;
-    line-height: 1.7;
-}
-
-.glass-card {
-    background: rgba(255,255,255,0.75);
-    backdrop-filter: blur(12px);
-    padding: 28px;
-    border-radius: 24px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    border: 1px solid rgba(255,255,255,0.3);
-}
-
-.metric-card {
-    background: white;
-    padding: 18px;
-    border-radius: 18px;
     text-align: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    color: #6b7280;
+    margin-bottom: 2rem;
+    font-size: 17px;
 }
 
-.metric-title {
-    color: #6c7293;
-    font-size: 15px;
-}
-
-.metric-value {
-    color: #1b2559;
+.result-box {
+    padding: 1rem;
+    border-radius: 16px;
+    text-align: center;
     font-size: 24px;
-    font-weight: 700;
+    font-weight: bold;
+    margin-top: 1rem;
 }
 
-.result-normal {
-    background: linear-gradient(135deg, #d4fc79, #96e6a1);
-    padding: 22px;
-    border-radius: 22px;
-    color: #134b2f;
-    font-size: 26px;
-    font-weight: 700;
-    text-align: center;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+.normal {
+    background-color: #dcfce7;
+    color: #166534;
 }
 
-.result-glaucoma {
-    background: linear-gradient(135deg, #ff9a9e, #fecfef);
-    padding: 22px;
-    border-radius: 22px;
-    color: #6e1c29;
-    font-size: 26px;
-    font-weight: 700;
-    text-align: center;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-}
-
-.footer {
-    text-align: center;
-    color: #7d8597;
-    margin-top: 30px;
-    font-size: 14px;
+.glaucoma {
+    background-color: #fee2e2;
+    color: #991b1b;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 # ========================
-# Load Model & Scaler
+# LOAD MODEL
 # ========================
+
 model = joblib.load("model.pkl")
 scaler = joblib.load("scaler.pkl")
 
 # ========================
-# Feature Extraction
+# FEATURE EXTRACTION
 # ========================
 
 def extract_lbp_features(image, P, R):
@@ -125,7 +91,6 @@ def extract_lbp_features(image, P, R):
 
     return hist
 
-
 def extract_glcm_features(image):
     distances = [1]
     angles = [0, np.pi/4, np.pi/2, 3*np.pi/4]
@@ -140,14 +105,20 @@ def extract_glcm_features(image):
     )
 
     features = []
-    properties = ['contrast', 'dissimilarity', 'homogeneity', 'energy', 'correlation']
+
+    properties = [
+        'contrast',
+        'dissimilarity',
+        'homogeneity',
+        'energy',
+        'correlation'
+    ]
 
     for prop in properties:
         feat = graycoprops(glcm, prop)
         features.extend(feat.flatten())
 
     return features
-
 
 def extract_features(image):
     features = []
@@ -164,75 +135,61 @@ def extract_features(image):
     return np.array(features)
 
 # ========================
-# Header
+# HEADER
 # ========================
 
-st.markdown('<div class="main-title">👁️ Deteksi Glaukoma</div>', unsafe_allow_html=True)
+st.title("👁️ Deteksi Glaukoma")
 
 st.markdown(
-    '<div class="subtitle">Sistem klasifikasi citra fundus retina menggunakan kombinasi fitur <b>Gray Level Co-occurrence Matrix (GLCM)</b> dan <b>Multiscale Local Binary Pattern (MS-LBP)</b> dengan algoritma <b>Support Vector Machine (SVM)</b>.</div>',
+    '<div class="subtitle">Klasifikasi citra fundus retina menggunakan kombinasi GLCM, MS-LBP, dan SVM</div>',
     unsafe_allow_html=True
 )
 
-st.markdown("<br>", unsafe_allow_html=True)
-
-st.markdown("""
-<div class="glass-card">
-<h4>📌 Tentang Sistem</h4>
-Sistem ini dirancang untuk membantu proses identifikasi awal glaukoma melalui analisis tekstur citra fundus retina secara otomatis.
-<br><br>
-Model klasifikasi dibangun menggunakan kombinasi fitur tekstur dan algoritma machine learning untuk membedakan citra retina normal dan glaukoma.
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
-
 # ========================
-# Upload Section
+# UPLOAD
 # ========================
 
 uploaded_file = st.file_uploader(
-    "📤 Upload Citra Fundus",
+    "Upload citra fundus...",
     type=["jpg", "jpeg", "png"]
 )
 
 if uploaded_file is not None:
 
-    file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-    img = cv2.imdecode(file_bytes, 1)
+    image = Image.open(uploaded_file)
 
-    st.image(img, caption="Citra Fundus Retina", use_container_width=True)
+    st.image(
+        image,
+        caption="Citra Fundus",
+        use_container_width=True
+    )
 
-    # ========================
-    # Preprocessing
-    # ========================
-    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img_gray = cv2.resize(img_gray, (256, 256))
+    if st.button("🔍 Analisis Gambar"):
 
-    # ========================
-    # Feature Extraction
-    # ========================
-    features = extract_features(img_gray)
+        with st.spinner("Sedang memproses gambar..."):
 
-    # Scaling
-    features = scaler.transform([features])
+            # Convert image
+            img = np.array(image)
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+            img = cv2.resize(img, (256, 256))
 
-    # Prediction
-    prediction = model.predict(features)[0]
+            # Feature extraction
+            features = extract_features(img)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+            # Scaling
+            features = scaler.transform([features])
 
-    if prediction == 0:
-        st.markdown(
-            '<div class="result-normal">✅ NORMAL</div>',
-            unsafe_allow_html=True
-        )
-    else:
-        st.markdown(
-            '<div class="result-glaucoma">⚠️ GLAUKOMA</div>',
-            unsafe_allow_html=True
-        )
+            # Prediction
+            prediction = model.predict(features)[0]
 
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    st.success("Prediksi berhasil dilakukan menggunakan model klasifikasi SVM")
+            # Result
+            if prediction == 0:
+                st.markdown(
+                    '<div class="result-box normal">✅ NORMAL</div>',
+                    unsafe_allow_html=True
+                )
+            else:
+                st.markdown(
+                    '<div class="result-box glaucoma">⚠️ GLAUKOMA</div>',
+                    unsafe_allow_html=True
+                )
