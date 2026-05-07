@@ -168,6 +168,8 @@ if uploaded_file is not None:
 
         with st.spinner("Sedang memproses gambar..."):
 
+            time.sleep(2)
+
             # Convert image
             img = np.array(image)
             img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
