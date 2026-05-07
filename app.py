@@ -236,12 +236,3 @@ if uploaded_file is not None:
     st.markdown("<br>", unsafe_allow_html=True)
 
     st.success("Prediksi berhasil dilakukan menggunakan model klasifikasi SVM")
-
-# ========================
-# Footer
-# ========================
-
-st.markdown(
-    '<div class="footer">Skripsi — Deteksi Glaukoma Menggunakan Kombinasi Fitur GLCM dan Multiscale LBP</div>',
-    unsafe_allow_html=True
-)
