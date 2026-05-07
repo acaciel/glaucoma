@@ -3,6 +3,7 @@ from PIL import Image
 import numpy as np
 import cv2
 import joblib
+import time
 from skimage.feature import graycomatrix, graycoprops, local_binary_pattern
 
 # ========================
